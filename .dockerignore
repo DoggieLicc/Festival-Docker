@@ -35,4 +35,8 @@ Desktop.ini
 *.properties
 bin/php/php.ini
 /.metadata/
+
+# Git
+.git
+.gitignore
 data/
