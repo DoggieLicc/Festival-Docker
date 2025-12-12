@@ -1,0 +1,13 @@
+services:
+  festival:
+    image: ghcr.io/doggielicc/festival:1.5
+    container_name: festival
+    restart: unless-stopped
+    ports:
+      - 19132:19132/udp
+    volumes:
+      - ./data:/server/data
+      - ./players:/server/players
+      - ./plugins:/server/plugins
+      - ./worlds:/server/worlds
+      - ./logs:/server/logs

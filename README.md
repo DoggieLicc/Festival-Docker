@@ -13,6 +13,17 @@ Supported versions: 0.11.0-0.11.1 *& prob some builds*
 
 * *and some other bug fixes...*
 
+# Running with docker compose
+## Run setup wizard
+You should run the setup wizard before running the server for the first time:
+```
+mkdir data
+docker run --rm -it --mount type=bind,src=./data,dst=/server/data festival
+```
+After completing the setup, you must stop the server and use the `docker-compose.yml` file to run it
+```
+docker compose up -d
+```
 
 # PHP8 Binaries:
 ### PHP8.0 (Not tested, but should work)
