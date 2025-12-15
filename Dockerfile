@@ -1,5 +1,7 @@
 FROM debian:bullseye-slim
 
+LABEL org.opencontainers.image.source=https://github.com/DoggieLicc/Festival-Docker
+
 ARG PHP_BINARY_URL=https://github.com/pmmp/PHP-Binaries/releases/download/pm4-php-8.2-latest/PHP-8.2-Linux-x86_64-PM4.tar.gz
 
 RUN apt update && apt install -y wget net-tools && apt clean

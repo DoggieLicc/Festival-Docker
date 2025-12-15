@@ -18,7 +18,7 @@ Supported versions: 0.11.0-0.11.1 *& prob some builds*
 You should run the setup wizard before running the server for the first time:
 ```
 mkdir data
-docker run --rm -it --mount type=bind,src=./data,dst=/server/data festival
+docker run --rm -it --mount type=bind,src=./data,dst=/server/data ghcr.io/doggielicc/festival:1.5
 ```
 After completing the setup, you must stop the server and use the `docker-compose.yml` file to run it
 ```
