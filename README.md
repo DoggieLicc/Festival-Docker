@@ -3,6 +3,8 @@ Supported versions: 0.11.0-0.11.1 *& prob some builds*
 
 # Features:
 
+* Docker image with minimal Alpine base
+
 * All mobs and eggs
 
 * All blocks *(will be soon)*
