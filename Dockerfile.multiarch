@@ -1,0 +1,86 @@
+ARG TARGETARCH
+
+# Building Stage Base
+FROM --platform=$BUILDPLATFORM alpine:3.20.8 AS builder-base
+
+RUN apk add --no-interactive -U --no-cache git wget build-base bash autoconf automake m4 bison cmake re2c libtool pkgconf linux-headers
+
+WORKDIR /build
+
+RUN git clone --depth 1 --branch pm4-php-8.2-latest https://github.com/pmmp/PHP-Binaries.git
+
+# ARM64 Builder (Crosscompile)
+FROM builder-base AS builder-arm64
+
+RUN apk add --no-interactive -U --no-cache texinfo
+
+RUN git clone --depth 1 https://github.com/richfelker/musl-cross-make
+
+WORKDIR /build/musl-cross-make
+
+RUN echo "TARGET = aarch64-linux-musl" > config.mak
+
+RUN make -j4 && make install
+
+ENV PATH="/build/musl-cross-make/output/bin:${PATH}"
+
+WORKDIR /build/PHP-Binaries
+
+RUN ./compile.sh -t android-aarch64 -x -P4 -g -j4
+
+# AMD64 Builder
+FROM builder-base AS builder-amd64
+
+WORKDIR /build/PHP-Binaries
+
+RUN ./compile.sh -P4 -g -j4
+
+# Build merge
+FROM builder-$TARGETARCH AS builder-merge
+
+RUN mv /build/PHP-Binaries/bin/php7 /bin/php7
+
+ENV PATH="/bin/php7/bin:${PATH}"
+
+RUN EXTENSION_DIR=$(find "/bin" -name "*debug-zts*") && \
+    grep -q '^extension_dir' /bin/php7/bin/php.ini && \
+    sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" /bin/php7/bin/php.ini || \
+    echo "extension_dir=\"$EXTENSION_DIR\"" >> /bin/php7/bin/php.ini
+
+WORKDIR /build/
+
+COPY ./src/ server/src
+
+COPY create-phar.php .
+
+RUN php --define phar.readonly=0 create-phar.php
+
+# Runtime stage
+FROM alpine:3.23 AS runtime-stage
+
+LABEL org.opencontainers.image.source=https://github.com/DoggieLicc/Festival-Docker
+LABEL org.opencontainers.image.description="A Containerized PocketMine-MP 1.5dev-1438 fork"
+
+COPY --from=builder-merge /bin/php7 /bin/php7
+
+RUN apk add --no-interactive -U --no-cache ncurses libgcc libstdc++
+
+ENV PATH="/bin/php7/bin:${PATH}"
+
+WORKDIR /server
+
+COPY --from=builder-merge /build/PocketMine-MP.phar .
+
+RUN mkdir data && \
+    mkdir logs && \
+    ln -s data/banned-ips.txt banned-ips.txt && \
+    ln -s data/festival.yml festival.yml && \
+    ln -s data/ops.data ops.txt && \
+    ln -s data/pocketmine.yml pocketmine.yml && \
+    ln -s data/server.properties server.properties && \
+    ln -s data/white-list.txt white-list.txt && \
+    ln -s server.log logs/server.log
+
+EXPOSE 19132/udp
+
+CMD ["php", "PocketMine-MP.phar"]
