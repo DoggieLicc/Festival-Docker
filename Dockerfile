@@ -53,6 +53,5 @@ RUN mkdir data && \
     ln -s server.log logs/server.log
 
 EXPOSE 19132/udp
-LABEL org.opencontainers.image.source=https://github.com/DoggieLicc/Festival-Docker
 
 CMD ["php", "PocketMine-MP.phar"]

@@ -59,7 +59,6 @@ RUN php --define phar.readonly=0 create-phar.php
 FROM alpine:3.23 AS runtime-stage
 
 LABEL org.opencontainers.image.source=https://github.com/DoggieLicc/Festival-Docker
-LABEL org.opencontainers.image.description="A Containerized PocketMine-MP 1.5dev-1438 fork"
 
 COPY --from=builder-merge /bin/php7 /bin/php7
 
@@ -71,8 +70,7 @@ WORKDIR /server
 
 COPY --from=builder-merge /build/PocketMine-MP.phar .
 
-RUN mkdir data && \
-    mkdir logs && \
+RUN mkdir data logs && \
     ln -s data/banned-ips.txt banned-ips.txt && \
     ln -s data/festival.yml festival.yml && \
     ln -s data/ops.data ops.txt && \
