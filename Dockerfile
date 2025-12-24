@@ -6,7 +6,13 @@ RUN apk add --no-interactive -U git wget build-base bash autoconf automake m4 bi
 
 WORKDIR /build
 
-RUN git clone --depth 1 --branch pm4-php-8.2-latest https://github.com/pmmp/PHP-Binaries.git
+ARG PHP_TAG=8.2
+ENV PHP_TAG=$PHP_TAG
+
+ARG PHP_VERSION=8.2.30
+ENV PHP_VERSION=$PHP_VERSION
+
+RUN git clone --depth 1 --branch pm4-php-$PHP_TAG-latest https://github.com/pmmp/PHP-Binaries.git
 
 WORKDIR /build/PHP-Binaries
 
@@ -21,7 +27,7 @@ RUN EXTENSION_DIR=$(find "/bin" -name "*debug-zts*") && \
     sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" /bin/php7/bin/php.ini || \
     echo "extension_dir=\"$EXTENSION_DIR\"" >> /bin/php7/bin/php.ini
 
-WORKDIR /build/
+WORKDIR /build
 
 COPY ./src/ server/src
 
