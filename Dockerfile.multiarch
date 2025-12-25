@@ -22,20 +22,27 @@ RUN make -j4 && make install
 
 ENV PATH="/build/musl-cross-make/output/bin:${PATH}"
 
-# ARM64 Builder Stage 2 (PHP)
-FROM builder-arm64-stage1 AS builder-arm64
+# Clones PHP-Bin repo
+FROM builder-base AS php-bin-clone
 
 WORKDIR /build
 
 ARG PHP_TAG=8.2
 ENV PHP_TAG=$PHP_TAG
 
-ARG PHP_VERSION=8.2.30
-ENV PHP_VERSION=$PHP_VERSION
-
 RUN git clone --depth 1 --branch pm4-php-$PHP_TAG-latest https://github.com/pmmp/PHP-Binaries.git
 
+# ARM64 Builder Stage 2 (PHP)
+FROM builder-arm64-stage1 AS builder-arm64
+
+WORKDIR /build
+
+COPY --from=php-bin-clone /build/PHP-Binaries /build/PHP-Binaries
+
 WORKDIR /build/PHP-Binaries
+
+ARG PHP_VERSION=8.2.30
+ENV PHP_VERSION=$PHP_VERSION
 
 RUN ./compile.sh -t android-aarch64 -x -P4 -g -j4
 
@@ -44,15 +51,12 @@ FROM builder-base AS builder-amd64
 
 WORKDIR /build
 
-ARG PHP_TAG=8.2
-ENV PHP_TAG=$PHP_TAG
+COPY --from=php-bin-clone /build/PHP-Binaries /build/PHP-Binaries
+
+WORKDIR /build/PHP-Binaries
 
 ARG PHP_VERSION=8.2.30
 ENV PHP_VERSION=$PHP_VERSION
-
-RUN git clone --depth 1 --branch pm4-php-$PHP_TAG-latest https://github.com/pmmp/PHP-Binaries.git
-
-WORKDIR /build/PHP-Binaries
 
 RUN ./compile.sh -P4 -g -j4
 
