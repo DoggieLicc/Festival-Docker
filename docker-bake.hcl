@@ -44,6 +44,14 @@ variable "IMAGE_SOURCE" {
     default = "https://github.com/DoggieLicc/Festival-Docker"
 }
 
+variable "CACHE_REGISTRY" {
+    default = "git.doggieli.cc"
+}
+
+variable "CACHE_REGISTRY_USERNAME" {
+    default = "doggie"
+}
+
 target "_base" {
   dockerfile = "Dockerfile.multiarch"
   context    = "."
@@ -54,6 +62,30 @@ target "_base" {
   annotations = [
     "index:org.opencontainers.image.description=${IMAGE_DESCRIPTION}",
     "index:org.opencontainers.image.source=${IMAGE_SOURCE}"
+  ]
+
+  cache_to = [
+    {
+        type = "registry",
+        ref = "${CACHE_REGISTRY}/${CACHE_REGISTRY_USERNAME}/${IMG_NAME}-cache",
+        mode = "max",
+        compression = "zstd",
+        oci-mediatypes = true,
+        image-manifest = true
+    },
+    {
+        type = "local"
+    }
+  ]
+
+  cache_from = [
+    {
+        type = "registry",
+        ref = "${CACHE_REGISTRY}/${CACHE_REGISTRY_USERNAME}/${IMG_NAME}-cache",
+    },
+    {
+        type = "local"
+    }
   ]
 }
 
