@@ -7,19 +7,15 @@ group "default" {
 }
 
 ## Version Variables
-variable "MAJOR_VER" {  # 1.x.x-xxxxxxx
+variable "MAJOR_VER" {  # 1.x-xxxxxxx
     default = "1"
 }
 
-variable "MINOR_VER" {  # x.5.x-xxxxxxx
+variable "MINOR_VER" {  # x.5-xxxxxxx
     default = "5"
 }
 
-variable "PATCH_VER" {  # x.x.5-xxxxxxx
-    default = "5"
-}
-
-variable "HASH_VER" {  # x.x.x-00c631d
+variable "HASH_VER" {  # x.x-00c631d
     default = "00c631d"
 }
 
@@ -40,16 +36,24 @@ variable "IMAGE_URL_BASE" {
     default = "${REGISTRY}/${USERNAME}/${IMG_NAME}"
 }
 
+variable "IMAGE_DESCRIPTION" {
+    default = "A Containerized PocketMine-MP 1.5dev-1438 fork"
+}
+
+variable "IMAGE_SOURCE" {
+    default = "https://github.com/DoggieLicc/Festival-Docker"
+}
+
 target "_base" {
   dockerfile = "Dockerfile.multiarch"
   context    = "."
   platforms  = ["linux/amd64", "linux/arm64"]
   provenance = false
-  push = true
   output = ["type=registry"]
 
   annotations = [
-    "index:org.opencontainers.image.description=A Containerized PocketMine-MP 1.5dev-1438 fork"
+    "index:org.opencontainers.image.description=${IMAGE_DESCRIPTION}",
+    "index:org.opencontainers.image.source=${IMAGE_SOURCE}"
   ]
 }
 
@@ -62,15 +66,12 @@ target "php82" {
   }
 
   tags = [
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-${PATCH_VER}",
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}",
     "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}",
     "${IMAGE_URL_BASE}:latest",
 
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-${PATCH_VER}-php8-2",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-php8-2",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}-php8-2",
-    "${IMAGE_URL_BASE}:latest-php8-2",
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-php8-2",
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-php8-2"
   ]
 }
 
@@ -84,9 +85,8 @@ target "php81" {
   }
 
   tags = [
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-${PATCH_VER}-php8-1",
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-php8-1",
     "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-php8-1",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}-php8-1",
   ]
 }
 
@@ -100,8 +100,7 @@ target "php80" {
   }
 
   tags = [
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-${PATCH_VER}-php8-0",
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-php8-0",
     "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-php8-0",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}-php8-0",
   ]
 }
