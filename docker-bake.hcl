@@ -44,12 +44,21 @@ variable "IMAGE_SOURCE" {
     default = "https://github.com/DoggieLicc/Festival-Docker"
 }
 
+## Caching
 variable "CACHE_REGISTRY" {
-    default = "git.doggieli.cc"
+    default = "${REGISTRY}"
 }
 
 variable "CACHE_REGISTRY_USERNAME" {
-    default = "doggie"
+    default = "${USERNAME}"
+}
+
+variable "CACHE_REGISTRY_IMG_NAME" {
+    default = "${IMG_NAME}-cache"
+}
+
+variable "CACHE_REGISTRY_URL" {
+    default = "${CACHE_REGISTRY}/${CACHE_REGISTRY_USERNAME}/${CACHE_REGISTRY_IMG_NAME}"
 }
 
 target "_base" {
@@ -67,7 +76,7 @@ target "_base" {
   cache_to = [
     {
         type = "registry",
-        ref = "${CACHE_REGISTRY}/${CACHE_REGISTRY_USERNAME}/${IMG_NAME}-cache",
+        ref = "${CACHE_REGISTRY_URL}",
         mode = "max",
         compression = "zstd",
         oci-mediatypes = true,
@@ -81,7 +90,7 @@ target "_base" {
   cache_from = [
     {
         type = "registry",
-        ref = "${CACHE_REGISTRY}/${CACHE_REGISTRY_USERNAME}/${IMG_NAME}-cache",
+        ref = "${CACHE_REGISTRY_URL}",
     },
     {
         type = "local"
