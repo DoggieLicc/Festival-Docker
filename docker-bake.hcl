@@ -1,8 +1,7 @@
 group "default" {
   targets = [
-    "php82",
-    "php81",
-    "php80",
+    "latest",
+    "matrix"
   ]
 }
 
@@ -73,33 +72,62 @@ target "_base" {
     "index:org.opencontainers.image.source=${IMAGE_SOURCE}"
   ]
 
-  cache_to = [
+}
+
+target "matrix" {
+  name = "festival-${item.tgt}"
+  inherits = ["_base"]
+  matrix = {
+    item = [
+      {
+        tgt = "php8-0"
+        php_tag = "8.0"
+        php_ver = "8.0.30"
+      },
+      {
+        tgt = "php8-1"
+        php_tag = "8.1"
+        php_ver = "8.1.34"
+      },
+      {
+        tgt = "php8-2"
+        php_tag = "8.2"
+        php_ver = "8.2.30"
+      }
+    ]
+  }
+
+  args = {
+    PHP_TAG = item.php_tag
+    PHP_VERSION = item.php_ver
+  }
+
+  tags = [
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-${item.tgt}",
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${item.tgt}"
+  ]
+
+  cache-to = [
     {
         type = "registry",
-        ref = "${CACHE_REGISTRY_URL}",
+        ref = "${CACHE_REGISTRY_URL}:${item.tgt}",
         mode = "max",
         compression = "zstd",
         oci-mediatypes = true,
         image-manifest = true
-    },
-    {
-        type = "local"
     }
   ]
 
-  cache_from = [
+  cache-from = [
     {
         type = "registry",
-        ref = "${CACHE_REGISTRY_URL}",
-    },
-    {
-        type = "local"
+        ref = "${CACHE_REGISTRY_URL}:${item.tgt}",
     }
   ]
 }
 
 # PHP 8.2 (Latest)
-target "php82" {
+target "latest" {
   inherits = ["_base"]
 
   args = {
@@ -110,38 +138,23 @@ target "php82" {
     "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}",
     "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}",
     "${IMAGE_URL_BASE}:latest",
-
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-php8-2",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-php8-2"
   ]
-}
 
-# PHP 8.1
-target "php81" {
-  inherits = ["_base"]
-
-  args = {
-    PHP_TAG     = "8.1"
-    PHP_VERSION = "8.1.34"
-  }
-
-  tags = [
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-php8-1",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-php8-1",
+  cache-to = [
+    {
+        type = "registry",
+        ref = "${CACHE_REGISTRY_URL}:php8-2",
+        mode = "max",
+        compression = "zstd",
+        oci-mediatypes = true,
+        image-manifest = true
+    }
   ]
-}
 
-# PHP 8.0
-target "php80" {
-  inherits = ["_base"]
-
-  args = {
-    PHP_TAG     = "8.0"
-    PHP_VERSION = "8.0.30"
-  }
-
-  tags = [
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-php8-0",
-    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-php8-0",
+  cache-from = [
+    {
+        type = "registry",
+        ref = "${CACHE_REGISTRY_URL}:php8-2",
+    }
   ]
 }
