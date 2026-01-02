@@ -5,6 +5,20 @@ group "default" {
   ]
 }
 
+group "export" {
+  targets = [
+    "bin-export",
+    "phar-export"
+  ]
+}
+
+group "release" {
+  targets = [
+    "default",
+    "export"
+  ]
+}
+
 ## Version Variables
 variable "MAJOR_VER" {  # 1.x-xxxxxxx
     default = "1"
@@ -63,6 +77,7 @@ variable "CACHE_REGISTRY_URL" {
 target "_base" {
   dockerfile = "Dockerfile.multiarch"
   context    = "."
+  target     = "runtime-stage"
   platforms  = ["linux/amd64", "linux/arm64"]
   provenance = false
   output = ["type=registry"]
@@ -122,6 +137,66 @@ target "matrix" {
     {
         type = "registry",
         ref = "${CACHE_REGISTRY_URL}:${item.tgt}",
+    }
+  ]
+}
+
+target "bin-export" {
+  name = "festival-${item.tgt}"
+  inherits = ["_base"]
+  matrix = {
+    item = [
+      {
+        tgt = "php8-0"
+        php_tag = "8.0"
+        php_ver = "8.0.30"
+      },
+      {
+        tgt = "php8-1"
+        php_tag = "8.1"
+        php_ver = "8.1.34"
+      },
+      {
+        tgt = "php8-2"
+        php_tag = "8.2"
+        php_ver = "8.2.30"
+      }
+    ]
+  }
+
+  args = {
+    PHP_TAG = item.php_tag
+    PHP_VERSION = item.php_ver
+  }
+
+  tags = [
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${HASH_VER}-${item.tgt}",
+    "${IMAGE_URL_BASE}:${MAJOR_VER}.${MINOR_VER}-${item.tgt}"
+  ]
+
+  cache-from = [
+    {
+        type = "registry",
+        ref = "${CACHE_REGISTRY_URL}:${item.tgt}",
+    }
+  ]
+
+  target = "bin-export"
+  output = ["type=local,dest=out"]
+}
+
+target "phar-export" {
+  dockerfile = "Dockerfile.multiarch"
+  context    = "."
+  target     = "phar-export"
+  platforms  = ["linux/amd64"]
+  provenance = false
+  output     = ["type=local,dest=out"]
+
+  cache-from = [
+    {
+        type = "registry",
+        ref = "${CACHE_REGISTRY_URL}:php8-2",
     }
   ]
 }

@@ -83,6 +83,28 @@ COPY create-phar.php .
 
 RUN php --define phar.readonly=0 create-phar.php
 
+# Binary exporter prep
+FROM builder-merge AS bin-export-prep
+
+WORKDIR /bin
+
+ARG PHP_TAG=8.2
+ENV PHP_TAG=$PHP_TAG
+ARG TARGETARCH
+ENV TARGETARCH=$TARGETARCH
+
+RUN tar -cpvzf /build/pm4-php-$PHP_TAG-$TARGETARCH.tar.gz ./php7/
+
+# PHP Binary export
+FROM scratch AS bin-export
+
+COPY --from=bin-export-prep /build/pm4-php-* /
+
+# Phar export
+FROM scratch AS phar-export
+
+COPY --from=phar-builder /build/PocketMine-MP.phar /
+
 # Runtime stage
 FROM alpine:3.23 AS runtime-stage
 

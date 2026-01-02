@@ -35,4 +35,7 @@ Desktop.ini
 *.properties
 bin/php/php.ini
 /.metadata/
+
+# Other
 data/
+out/
