@@ -1,7 +1,7 @@
 group "default" {
   targets = [
     "latest",
-    "matrix"
+    "matrix-builder"
   ]
 }
 
@@ -29,7 +29,7 @@ variable "MINOR_VER" {  # x.5-xxxxxxx
 }
 
 variable "HASH_VER" {  # x.x-00c631d
-    default = "00c631d"
+    default = "02a74de"
 }
 
 ## Registry Variables
@@ -89,7 +89,7 @@ target "_base" {
 
 }
 
-target "matrix" {
+target "matrix-builder" {
   name = "festival-${item.tgt}"
   inherits = ["_base"]
   matrix = {
@@ -142,8 +142,10 @@ target "matrix" {
 }
 
 target "bin-export" {
-  name = "festival-${item.tgt}"
+  name = "festival-${item.tgt}-export"
   inherits = ["_base"]
+  target = "bin-export"
+
   matrix = {
     item = [
       {
@@ -181,7 +183,6 @@ target "bin-export" {
     }
   ]
 
-  target = "bin-export"
   output = ["type=local,dest=out"]
 }
 
