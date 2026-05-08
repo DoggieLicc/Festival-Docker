@@ -19,6 +19,15 @@ group "release" {
   ]
 }
 
+## Source Variables
+variable "SOURCE_REPO" {
+    default = "https://github.com/freehij/Festival.git"
+}
+
+variable "SOURCE_BRANCH" {
+    default = "main"
+}
+
 ## Version Variables
 variable "MAJOR_VER" {  # 1.x-xxxxxxx
     default = "1"
@@ -80,7 +89,12 @@ target "_base" {
   target     = "runtime-stage"
   platforms  = ["linux/amd64", "linux/arm64"]
   provenance = false
-  output = ["type=registry"]
+  output     = ["type=registry"]
+
+  args = {
+    SOURCE_REPO = SOURCE_REPO
+    SOURCE_BRANCH = SOURCE_BRANCH
+  }
 
   annotations = [
     "index:org.opencontainers.image.description=${IMAGE_DESCRIPTION}",
@@ -115,6 +129,8 @@ target "matrix-builder" {
   args = {
     PHP_TAG = item.php_tag
     PHP_VERSION = item.php_ver
+    SOURCE_REPO = SOURCE_REPO
+    SOURCE_BRANCH = SOURCE_BRANCH
   }
 
   tags = [
@@ -194,6 +210,11 @@ target "phar-export" {
   provenance = false
   output     = ["type=local,dest=out"]
 
+  args = {
+    SOURCE_REPO = SOURCE_REPO
+    SOURCE_BRANCH = SOURCE_BRANCH
+  }
+
   cache-from = [
     {
         type = "registry",
@@ -208,6 +229,8 @@ target "latest" {
 
   args = {
     PHP_VERSION = "8.2.30"
+    SOURCE_REPO = SOURCE_REPO
+    SOURCE_BRANCH = SOURCE_BRANCH
   }
 
   tags = [

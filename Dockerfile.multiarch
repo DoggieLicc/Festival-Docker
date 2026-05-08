@@ -72,12 +72,23 @@ RUN EXTENSION_DIR=$(find "/bin" -name "*debug-zts*") && \
     sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" /bin/php7/bin/php.ini || \
     echo "extension_dir=\"$EXTENSION_DIR\"" >> /bin/php7/bin/php.ini
 
+# Download Festival src
+FROM --platform=$BUILDPLATFORM alpine/git:v2.52.0 AS src-download
+
+ARG SOURCE_REPO=https://github.com/freehij/Festival.git
+ENV SOURCE_REPO=$SOURCE_REPO
+
+ARG SOURCE_BRANCH=main
+ENV SOURCE_BRANCH=$SOURCE_BRANCH
+
+RUN git clone --recursive --depth 1 --single-branch --branch $SOURCE_BRANCH $SOURCE_REPO /server
+
 # Create PocketMine.phar file
 FROM --platform=$BUILDPLATFORM php:8.2-cli-alpine3.22 AS phar-builder
 
 WORKDIR /build
 
-COPY ./src/ server/src
+COPY --from=src-download server/src server/src
 
 COPY create-phar.php .
 

@@ -29,7 +29,13 @@ RUN EXTENSION_DIR=$(find "/bin" -name "*debug-zts*") && \
 
 WORKDIR /build
 
-COPY ./src/ server/src
+ARG SOURCE_REPO=https://github.com/freehij/Festival.git
+ENV SOURCE_REPO=$SOURCE_REPO
+
+ARG SOURCE_BRANCH=main
+ENV SOURCE_BRANCH=$SOURCE_BRANCH
+
+RUN git clone --recursive --depth 1 --single-branch --branch $SOURCE_BRANCH $SOURCE_REPO server
 
 COPY create-phar.php .
 
